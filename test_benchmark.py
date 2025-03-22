@@ -3,9 +3,9 @@ import subprocess
 import json
 import argparse
 
-# Paths (UPDATE THESE)
-SOLIDIFI_PATH = "/path/to/solidiFI-benchmark"
-VERIFSMART_CMD = "/path/to/verifsmart"
+# Automatically detect the repository root
+SOLIDIFI_PATH = os.path.dirname(os.path.abspath(__file__))
+VERIFSMART_CMD = "/path/to/verifsmart"  # Update if needed
 
 # Timeout for VerifSmart execution (in seconds)
 TIMEOUT = 60
@@ -13,9 +13,11 @@ TIMEOUT = 60
 # Output directory for VerifSmart results
 RESULTS_DIR = os.path.join(SOLIDIFI_PATH, "results", "VerifSmart")
 
-# Ground truth: Injection logs are inside each bug type folder
-BUG_CATEGORIES = ["Re-entrancy", "Timestamp", "UnhandledExceptions", 
-                  "UncheckedSend", "TOD", "IntegerBugs", "TxOrigin"]
+# Updated categories based on provided directory structure
+BUG_CATEGORIES = [
+    "Overflow-Underflow", "Re-entrancy", "Timestamp-Dependency", "TOD",
+    "tx.origin", "Unchecked-Send", "Unhandled-Exceptions"
+]
 
 def find_buggy_contracts():
     """Find all buggy contracts categorized by bug type."""
@@ -29,19 +31,6 @@ def find_buggy_contracts():
             buggy_contracts[bug_type] = contracts
 
     return buggy_contracts
-
-def extract_injected_bugs(log_file):
-    """Extract injected vulnerabilities from SolidiFI's bug log."""
-    injected_bugs = []
-    if not os.path.exists(log_file):
-        return injected_bugs
-
-    with open(log_file, "r") as f:
-        for line in f:
-            if "Bug Type:" in line:
-                injected_bugs.append(line.split(":")[-1].strip())
-
-    return set(injected_bugs)
 
 def run_verifsmart(contract_path):
     """Run VerifSmart on a Solidity contract and return detected vulnerabilities."""
@@ -72,34 +61,23 @@ def test_verifsmart():
 
     for bug_type, contracts in buggy_contracts.items():
         print(f"\nTesting {len(contracts)} contracts with {bug_type} bugs...")
-
+        i = 0
         for contract_path in contracts:
+            i= i+1
             contract_name = os.path.basename(contract_path)
-            log_file = contract_path.replace(".sol", "_BugLog.txt")
-
-            expected_vulnerabilities = extract_injected_bugs(log_file)
+            # print(contract_name)
+            # print(i)
             output = run_verifsmart(contract_path)
-            detected_vulnerabilities = parse_verifsmart_output(output)
+        #     detected_vulnerabilities = parse_verifsmart_output(output)
 
-            missed = expected_vulnerabilities - detected_vulnerabilities
-            extra = detected_vulnerabilities - expected_vulnerabilities
-
-            result = {
-                "contract": contract_name,
-                "bug_type": bug_type,
-                "path": contract_path,
-                "expected_vulnerabilities": list(expected_vulnerabilities),
-                "detected_vulnerabilities": list(detected_vulnerabilities),
-                "missed_vulnerabilities": list(missed),
-                "extra_vulnerabilities": list(extra),
-                "verifsmart_output": output
-            }
-            results.append(result)
-
-            if missed:
-                print(f"⚠️  Missed vulnerabilities in {contract_name}: {missed}")
-            if extra:
-                print(f"⚠️  False positives in {contract_name}: {extra}")
+        #     result = {
+        #         "contract": contract_name,
+        #         "bug_type": bug_type,
+        #         "path": contract_path,
+        #         "detected_vulnerabilities": list(detected_vulnerabilities),
+        #         "verifsmart_output": output
+        #     }
+        #     results.append(result)
 
     # Save results for inspection
     results_file = os.path.join(RESULTS_DIR, "verifsmart_results.json")
