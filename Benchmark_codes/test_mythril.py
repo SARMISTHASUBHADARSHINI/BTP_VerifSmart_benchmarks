@@ -5,7 +5,7 @@ import argparse
 import shutil
 
 # Base path (Update if needed)
-BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 RESULTS_DIR = os.path.join(BASE_PATH, "results", "Mythril")
 MYTHRIL_CMD = shutil.which("myth")  # Dynamically find Mythril path
 TIMEOUT = 600000

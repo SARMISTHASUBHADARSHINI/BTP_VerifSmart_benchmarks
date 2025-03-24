@@ -4,14 +4,15 @@ import json
 import argparse
 
 # Automatically detect the repository root
-SOLIDIFI_PATH = os.path.dirname(os.path.abspath(__file__))
+BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
 VERIFSMART_CMD = "/path/to/verifsmart"  # Update if needed
 
 # Timeout for VerifSmart execution (in seconds)
 TIMEOUT = 60
 
 # Output directory for VerifSmart results
-RESULTS_DIR = os.path.join(SOLIDIFI_PATH, "results", "VerifSmart")
+RESULTS_DIR = os.path.join(BASE_PATH, "results", "VerifSmart")
 
 # Updated categories based on provided directory structure
 BUG_CATEGORIES = [
@@ -22,7 +23,7 @@ BUG_CATEGORIES = [
 def find_buggy_contracts():
     """Find all buggy contracts categorized by bug type."""
     buggy_contracts = {}
-    buggy_contracts_dir = os.path.join(SOLIDIFI_PATH, "buggy_contracts")
+    buggy_contracts_dir = os.path.join(BASE_PATH, "buggy_contracts")
 
     for bug_type in BUG_CATEGORIES:
         bug_dir = os.path.join(buggy_contracts_dir, bug_type)
