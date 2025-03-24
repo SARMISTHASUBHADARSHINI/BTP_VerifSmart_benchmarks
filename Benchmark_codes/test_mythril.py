@@ -38,11 +38,16 @@ def run_mythril(contract_path):
 
     try:
         print(f"🔍 Running Mythril on: {contract_path}")
+        # result = subprocess.run(
+        #     f"{MYTHRIL_CMD} analyze {contract_path} -o json",
+        #     shell=True, capture_output=True, text=True
+        # )
+        print(f"python -m mythril analyze {contract_path} -o json")
         result = subprocess.run(
-            f"{MYTHRIL_CMD} analyze {contract_path} -o json",
+            f"python -m mythril analyze {contract_path} -o json",
             shell=True, capture_output=True, text=True
         )
-
+    
         if result.returncode != 0:
             return f"Error: {result.stderr.strip()}"
 
